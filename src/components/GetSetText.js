@@ -64,6 +64,15 @@ class GetSetText extends Component{
             const web3 = window.web3;
             web3.eth.net.getId().then(function(d) {
                 console.log(d, "DDD")
+                const _sampleString = SampleString.networks[d];
+                var Contract = require('web3-eth-contract');
+                // Contract.setProvider('https://data-seed-prebsc-1-s1.binance.org:8545');
+                let sampleString = new Contract( SampleString.abi,_sampleString.address);
+                sampleString.setProvider('https://data-seed-prebsc-1-s1.binance.org:8545')//@todo ajustar los set providers para que sean dinamico
+                var get = sampleString.methods.get()
+                get.call().then(function(a){
+                    that.setCurrentValue(a)
+                });
             });
 
         }else{
