@@ -12,13 +12,14 @@ import {DataView} from "primereact/dataview";
 
 class DirectAccount extends Component{
 
+   
 
 
     constructor(props) {
         super(props);
 
+        this.web3js = new Web3('https://data-seed-prebsc-1-s1.binance.org:8545');
         // this.address = this.props.match.params.address;
-
         this.state = {
             recipient: '',
             value: '',
@@ -29,10 +30,17 @@ class DirectAccount extends Component{
             account:{},
             accountBalance:0,
             DAIBalance:0,
-
+            network:97 
             // toastRef: Toast(),
             // privateKeyModal: false
         };
+        if (window.ethereum) {
+            window.web3 = new Web3(window.ethereum);
+            window.ethereum.enable();
+            web3 = window.web3;
+        }else{
+            this.web3js = new Web3('https://data-seed-prebsc-1-s1.binance.org:8545')
+        }
         let privateKey = sessionStorage.getItem('pkencoded');
         console.log("cargando llave")
         if (!privateKey) {
@@ -46,23 +54,50 @@ class DirectAccount extends Component{
             console.log(" llave encontrada",privateKey)
         }
 
-        let account = web3.eth.accounts.privateKeyToAccount(privateKey)
+        let account = this.web3js.eth.accounts.privateKeyToAccount(privateKey)
         this.state.account = account
         this.loadBalances()
 
 
     }
-    loadBalances(){
-        const d=5777 //temporalmente el network id
+    getContract(){
+        const d=this.state.network //temporalmente el network id
         const _daiToken = DaiToken.networks[d];
         let account = this.state.account
         console.log("CURRENT ACCOUNT",account)
-        web3.eth.getBalance(account.address).then(a=>this.setBalance(a))
-        let daiToken = new web3.eth.Contract(
+        
+        this.web3js.eth.getBalance(account.address).then(a=>this.setBalance(a))
+        let daiToken = new this.web3js.eth.Contract(
+            DaiToken.abi,
+            _daiToken.address,
+        );
+        return daiToken;
+    }
+    loadEstadisticas(){
+        console.log("TRATANDO DE FILTRAR EVENTOS")
+        let myContract = this.getContract();
+        myContract.getPastEvents('Transfer', {
+            filter: {}, // Using an array means OR: e.g. 20 or 23
+            fromBlock: 0,
+            toBlock: 'latest'
+        }, function(error, events){ console.log(events); })
+        .then(function(events){
+            console.log("CARGO EVENTOS") // same results as the optional callback above
+        });
+    }
+    loadBalances(){
+        const d=this.state.network //temporalmente el network id
+        const _daiToken = DaiToken.networks[d];
+        let account = this.state.account
+        console.log("CURRENT ACCOUNT",account)
+        
+        this.web3js.eth.getBalance(account.address).then(a=>this.setBalance(a))
+        let daiToken = new this.web3js.eth.Contract(
             DaiToken.abi,
             _daiToken.address,
         );
         daiToken.methods.balanceOf(account.address).call().then(a =>this.setDaiBalance(a))
+        this.loadEstadisticas()
     }
     showText(text,severity=false){
         if(!severity){
@@ -124,13 +159,14 @@ class DirectAccount extends Component{
         let privateKey = this.state.privateKey;
         let {value, recipient } = this.state;
         value = web3.utils.toWei(value, 'ether');
-        const d=5777 //temporalmente el network id
-        const _daiToken = DaiToken.networks[d];
-        let daiToken = new web3.eth.Contract(
+        // const d=5777 //temporalmente el network id
+        const _daiToken = DaiToken.networks[this.state.network];
+        let daiToken = new this.web3js.eth.Contract(
             DaiToken.abi,
             _daiToken.address,
         );
-
+        console.log("tiene provider ",this.web3js.currentProvider);
+        daiToken.setProvider(this.web3js.currentProvider)
         try {
             const makeRequest = await daiToken.methods.transfer(recipient, value);
             const options = {
@@ -138,9 +174,11 @@ class DirectAccount extends Component{
                 data: makeRequest.encodeABI(),
                 gas: '1000000'
             };
+            web3.setProvider(this.web3js.currentProvider)
             await signAndSendTransaction(options, privateKey);
             this.setState({ success: true,recipient:'',value:'' });
             this.loadBalances()
+            this.loadEstadisticas()
 
         } catch (error) {
             console.log("error ? :( ")
@@ -201,6 +239,10 @@ class DirectAccount extends Component{
                                 <Button onClick={this.onSubmit} >Enviar!</Button>
 
                             </form>
+                    </div>
+                    <div className="card mt-3">
+                       <h5> ESTADISTICAS</h5>
+
                     </div>
                 </div>
             </div>
