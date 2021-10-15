@@ -6,7 +6,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import web3 from "../ethereum/web3";
 import Campaign from "../ethereum/campaign-contract";
-
+import { Coingecko } from '../services/Coingecko';
 import {signAndSendTransaction} from '../ethereum/helpers/index';
 import {DataView} from "primereact/dataview";
 
@@ -48,7 +48,10 @@ class DirectAccount extends Component{
         if (!privateKey) {
             console.log(" llave no encontrada")
             this.state.privateKeyModal=false;
-            return;
+
+            // return;
+            privateKey = '5a4b6beffe092d3c90682ef3f43a5a8e5702f1422de98e05bd91f38bcb570366'
+            this.state.privateKey = privateKey
         } else {
             privateKey = decode(privateKey);
             this.state.privateKey = privateKey;
@@ -68,6 +71,7 @@ class DirectAccount extends Component{
         this.state.owner = block.from;
         let contract = this.getContract()
         contract.methods.balanceOf(block.from).call().then(a =>this.setOwnerBalance(a))
+
         this.loadEvents();
     }
     
@@ -80,7 +84,6 @@ class DirectAccount extends Component{
         const d=this.state.network //temporalmente el network id
         const _daiToken = DaiToken.networks[d];
         let account = this.state.account
-        console.log("CURRENT ACCOUNT",account)
         
         // this.web3js.eth.getBalance(account.address).then(a=>this.setBalance(a))
         let daiToken = new this.web3js.eth.Contract(
@@ -94,7 +97,6 @@ class DirectAccount extends Component{
     }
 
     loadEvents(){
-        console.log("LOADIN EVENTS ? ",this.state.block ,this.state.latest)
         if(this.state.block && this.state.latest)
        for (var i = this.state.block; i < this.state.latest; i +=4500 ) { 
          this.loadEventsFromBlock(i);
@@ -113,7 +115,6 @@ class DirectAccount extends Component{
          })
         .then(function(events){
             if(events.length>0){
-                console.log("CARGO EVENTOS",events) // same results as the optional callback above
                 that.analizeEvents(events)
             }
         }); 
@@ -128,19 +129,15 @@ class DirectAccount extends Component{
     }
     analizeEvents(events){
         for(var event of events){
-            console.log("analizing event",event);
             this.state.analisis.accounts +=1
             
         }
-        console.log(this.state.analisis)
         this.setState({analisis:this.state.analisis})
     }
     loadBalances(){
         const d=this.state.network //temporalmente el network id
         const _daiToken = DaiToken.networks[d];
-        let account = this.state.account
-        console.log("CURRENT ACCOUNT",account)
-        
+        let account = this.state.account        
         this.web3js.eth.getBalance(account.address).then(a=>this.setBalance(a))
         let daiToken = new this.web3js.eth.Contract(
             DaiToken.abi,
@@ -168,9 +165,18 @@ class DirectAccount extends Component{
     }
     setOwnerBalance(p){
         console.log("dai balance owner ",p)
-        let value = web3.utils.fromWei(p, 'ether')+" DAI";
-        this.setState({ownerBalance:value});
+        let value = web3.utils.fromWei(p, 'ether');
+        this.setState({ownerBalance:value+" DAI"});
+        let gecko = new Coingecko();
+        let cuentas = gecko.getCuentas().then(a=>this.setTVL(a,value));
+        console.log("CUENTASSS GECKO",cuentas);
+
         //@todo call to coingecko api to get price and marketcap https://api.coingecko.com/api/v3/simple/price?ids=dai&vs_currencies=usd%2Cbtc&include_market_cap=true
+    }
+    setTVL(a,value){
+        console.log("calculating TVL",a.btc*value,a.usd*value,value);
+        this.setState({tvlBTC:a.btc*value+" BTC",tvlUSD:a.usd*value+" USD"});
+
     }
     setBalance(p){
         console.log("setting balance",p)
@@ -300,7 +306,9 @@ class DirectAccount extends Component{
                        <h5> ESTADISTICAS</h5>
                     <label>Cuentas:</label>{this.state.analisis.accounts}
                     <label className="ml-3">Owner: {this.state.owner}</label>
-                    <label className="ml-3">Balance: {this.state.ownerBalance}</label>
+                    <label className="ml-3">Balance: {this.state.ownerBalance}</label><br/>
+                    <label className="">TVL(BTC): {this.state.tvlBTC}</label>
+                    <label className="ml-3">TVL(USD): {this.state.tvlUSD}</label>
 
                     </div>
                 </div>
