@@ -30,7 +30,9 @@ class DirectAccount extends Component{
             account:{},
             accountBalance:0,
             DAIBalance:0,
-            network:97 
+            network:97 ,
+            analisis:{accounts:0}
+
             // toastRef: Toast(),
             // privateKeyModal: false
         };
@@ -45,20 +47,34 @@ class DirectAccount extends Component{
         console.log("cargando llave")
         if (!privateKey) {
             console.log(" llave no encontrada")
-
             this.state.privateKeyModal=false;
             return;
         } else {
             privateKey = decode(privateKey);
-            this.state.privateKey = privateKey
-            console.log(" llave encontrada",privateKey)
+            this.state.privateKey = privateKey;
+            console.log(" llave encontrada",privateKey);
         }
 
-        let account = this.web3js.eth.accounts.privateKeyToAccount(privateKey)
-        this.state.account = account
-        this.loadBalances()
+        let account = this.web3js.eth.accounts.privateKeyToAccount(privateKey);
+        this.state.account = account;
+        this.loadEstadisticas();
+        this.loadBalances();
+        this.web3js.eth.getBlockNumber().then(a=>this.setLatest(a))
 
-
+    }
+    setBlock(block){
+        console.log("   BLOQUE DE INICIO DEL CONTRATO " ,block)
+        this.state.block = block.blockNumber;
+        this.state.owner = block.from;
+        let contract = this.getContract()
+        contract.methods.balanceOf(block.from).call().then(a =>this.setOwnerBalance(a))
+        this.loadEvents();
+    }
+    
+    setLatest(a){
+        console.log("SETTING LATEST",a);
+        this.state.latest = a;
+        this.loadEvents();
     }
     getContract(){
         const d=this.state.network //temporalmente el network id
@@ -66,24 +82,58 @@ class DirectAccount extends Component{
         let account = this.state.account
         console.log("CURRENT ACCOUNT",account)
         
-        this.web3js.eth.getBalance(account.address).then(a=>this.setBalance(a))
+        // this.web3js.eth.getBalance(account.address).then(a=>this.setBalance(a))
         let daiToken = new this.web3js.eth.Contract(
             DaiToken.abi,
             _daiToken.address,
         );
         return daiToken;
     }
-    loadEstadisticas(){
-        console.log("TRATANDO DE FILTRAR EVENTOS")
+    printResult(text,value){
+        console.log(text,value);
+    }
+
+    loadEvents(){
+        console.log("LOADIN EVENTS ? ",this.state.block ,this.state.latest)
+        if(this.state.block && this.state.latest)
+       for (var i = this.state.block; i < this.state.latest; i +=4500 ) { 
+         this.loadEventsFromBlock(i);
+       }
+    }
+    loadEventsFromBlock(block){
+        let that = this;
         let myContract = this.getContract();
         myContract.getPastEvents('Transfer', {
             filter: {}, // Using an array means OR: e.g. 20 or 23
-            fromBlock: 0,
-            toBlock: 'latest'
-        }, function(error, events){ console.log(events); })
+            fromBlock: block,
+            toBlock: block+4500
+        }, function(error, events){ 
+            if(error)
+                console.log(error,events);
+         })
         .then(function(events){
-            console.log("CARGO EVENTOS") // same results as the optional callback above
-        });
+            if(events.length>0){
+                console.log("CARGO EVENTOS",events) // same results as the optional callback above
+                that.analizeEvents(events)
+            }
+        }); 
+    }
+
+    loadEstadisticas(){
+        if(this.state.analisis.accounts==0){
+            const d=this.state.network 
+            let network = DaiToken.networks[d]
+            this.web3js.eth.getTransactionReceipt(network.transactionHash).then(a=>this.setBlock(a));
+        }
+    }
+    analizeEvents(events){
+        for(var event of events){
+            console.log("analizing event",event);
+            this.state.analisis.accounts +=1
+            
+        }
+        console.log(this.state.analisis)
+        this.setState({analisis:this.state.analisis})
     }
     loadBalances(){
         const d=this.state.network //temporalmente el network id
@@ -97,7 +147,7 @@ class DirectAccount extends Component{
             _daiToken.address,
         );
         daiToken.methods.balanceOf(account.address).call().then(a =>this.setDaiBalance(a))
-        this.loadEstadisticas()
+        // this.loadEstadisticas();
     }
     showText(text,severity=false){
         if(!severity){
@@ -115,6 +165,12 @@ class DirectAccount extends Component{
         console.log("dai balance ",p)
         let value = web3.utils.fromWei(p, 'ether')+" DAI";
         this.setState({DAIBalance:value});
+    }
+    setOwnerBalance(p){
+        console.log("dai balance owner ",p)
+        let value = web3.utils.fromWei(p, 'ether')+" DAI";
+        this.setState({ownerBalance:value});
+        //@todo call to coingecko api to get price and marketcap https://api.coingecko.com/api/v3/simple/price?ids=dai&vs_currencies=usd%2Cbtc&include_market_cap=true
     }
     setBalance(p){
         console.log("setting balance",p)
@@ -242,6 +298,9 @@ class DirectAccount extends Component{
                     </div>
                     <div className="card mt-3">
                        <h5> ESTADISTICAS</h5>
+                    <label>Cuentas:</label>{this.state.analisis.accounts}
+                    <label className="ml-3">Owner: {this.state.owner}</label>
+                    <label className="ml-3">Balance: {this.state.ownerBalance}</label>
 
                     </div>
                 </div>
