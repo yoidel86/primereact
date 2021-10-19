@@ -43,6 +43,7 @@ export const Dashboard = () => {
         // productService.getProducts().then(data => setDataviewValue(data));
         gecko.getCoins().then(data=>setOrderlistValue(data))
         gecko.getMarkets().then(data=>setDataviewValue(data))
+        
     }, []);
 
     const onSortChange = (event) => {

@@ -32,6 +32,7 @@ import { AppTopbar } from './AppTopbar';
 import { AppFooter } from './AppFooter';
 
 import { CSSTransition } from 'react-transition-group';
+import Wallets from './components/Wallets';
 
 const App = () =>  {
     const [layoutMode, setLayoutMode] = useState('static');
@@ -110,6 +111,10 @@ const App = () =>  {
                     label:'Get Set Text',
                     icon:'pi pi-fw pi-file',
                     to:'/GetSetText'
+                },{
+                    label:'Wallets',
+                    icon:'pi pi-fw pi-file',
+                    to:'/Wallets'
                 },
                 {
                     label:'Cambiar LLave privada',
@@ -196,6 +201,7 @@ const App = () =>  {
                     <Route path="/DirectAccount" component={DirectAccount} />
                     <Route path="/GetSetText" component={GetSetText} />
                     <Route path="/Account" component={Account} />
+                    <Route path="/Wallets" component={Wallets} />
 
                     {/*<Route path="/samplepath">*/}
                     {/*    <Dai title="Historial de Factura" sing="facturas" />*/}
