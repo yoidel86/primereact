@@ -77,3 +77,19 @@ c0d001f29c463eef45a678d92bebd4da2c7077fb14de0faa58cd784e03514108
 0x0354a027338dd5e8643ffbcc9c45f5cddae7982d563043e391b3125cdfa589df
 0xC579e999a017f1F4d7C3e5cBe0E5829F328c1622
 0x5b4c8300eddab987baf2d2ec3e2e38d843ba964ca19f6e52570dcdadb116a2c3
+
+
+
+contrato del tocken nft ArtToken
+0x992C993dAb00B25aaaB3b761884603eA31D9F755
+  > transaction hash:    0x48c6eb0c4ed1ef74696a15f072c8bbd91e2391666f551bd562891df787291453
+   > Blocks: 5            Seconds: 23
+   > contract address:    0x992C993dAb00B25aaaB3b761884603eA31D9F755
+   > block number:        13395537
+   > block timestamp:     1634749006
+   > account:             0xd13838884422972D7d5BD3E00905D6AB820ff998
+   > balance:             0.28542876
+   > gas used:            3176917 (0x3079d5)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.06353834 ETH

@@ -7,7 +7,7 @@ module.exports = {
     // You can also follow this format for other networks;
     // see <http://truffleframework.com/docs/advanced/configuration>
     // for more details on how to specify configuration options!
-
+    contracts_directory:'./contracts',
     networks: {
         development: {
             host: "127.0.0.1",
@@ -25,8 +25,21 @@ module.exports = {
             confirmations: 6,
             timeoutBlocks: 400,
             skipDryRun: true
-        },
+        },mainnet: {
+          provider: () => new HDWalletProvider(mnemonic, `https://mainnet.infura.io/v3/2fc8426062744d85957f8f3e5170c436`),
+          network_id: 1,
+      },
     },
+    compilers: {
+        solc: {
+          version: "0.8.9",
+        },
+      },
+    //   console: {
+    //     require: [
+    //       { path: "./src/abis/ArtToken.json" },
+    //     ]
+    // },
     contracts_build_directory: './src/abis/',
 
 };

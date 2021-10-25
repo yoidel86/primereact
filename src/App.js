@@ -25,6 +25,7 @@ import {Account} from "./components/Account";
 import DirectAccount from "./components/DirectAccount";
 import GetSetText from "./components/GetSetText";
 import {Dai} from "./components/Dai";
+import {FND} from "./components/FND";
 import { Route, useHistory } from 'react-router-dom';
 import { AppMenu } from './AppMenu';
 import { AppProfile } from './AppProfile';
@@ -115,6 +116,10 @@ const App = () =>  {
                     label:'Wallets',
                     icon:'pi pi-fw pi-file',
                     to:'/Wallets'
+                },{
+                    label:'FND',
+                    icon:'pi pi-fw pi-file',
+                    to:'/Fnd'
                 },
                 {
                     label:'Cambiar LLave privada',
@@ -202,6 +207,7 @@ const App = () =>  {
                     <Route path="/GetSetText" component={GetSetText} />
                     <Route path="/Account" component={Account} />
                     <Route path="/Wallets" component={Wallets} />
+                    <Route path="/Fnd" component={FND} />
 
                     {/*<Route path="/samplepath">*/}
                     {/*    <Dai title="Historial de Factura" sing="facturas" />*/}
