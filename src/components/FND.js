@@ -9,7 +9,7 @@ import {Toast} from "primereact/toast";
 export const FND = () =>{
 
     const [networkId,setNetworkId] = useState('')
-    const [text, setText] = useState('');
+    const [symbol, setSymbol] = useState('');
     const [tokenName, setTokenName] = useState('');
     const [tokenDescription, setTokenDescription] = useState('');
     const [tokenImg, setTokenImg] = useState('');
@@ -88,6 +88,9 @@ export const FND = () =>{
             }).catch(function(e){
                 console.log("ERROR 222 ",e);
             })
+            fndNFT721.methods.symbol().call().then(function(symbol){
+                setSymbol(symbol)
+            })
         }
     }
 
@@ -114,7 +117,9 @@ export const FND = () =>{
             }).catch(function(e){
                 console.log("ERROR 111 ",e);
             })
-
+            fndNFT721.methods.symbol().call().then(function(symbol){
+                setSymbol(symbol)
+            })
           
         } else if (window.web3) {
             window.web3 = new Web3(window.web3.currentProvider);
@@ -134,6 +139,9 @@ export const FND = () =>{
                 console.log("contract saved balance seted",val)
             }).catch(function(e){
                 console.log("ERROR 222 ",e);
+            })
+            fndNFT721.methods.symbol().call().then(function(symbol){
+                setSymbol(symbol)
             })
         }
     }
@@ -170,7 +178,7 @@ export const FND = () =>{
             <Toast ref={toastRef} />
             <div className="row">
                 <div className="col-md-6"><div className='card'>
-                     
+                     SYMBOL:{symbol}<br/>
                      ADDRESS:{account} <br/>
                      TOKEN:{amount}<br/>
                      METADATA url:<a href={url} target="_blank"> {url}</a>
