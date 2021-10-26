@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import Web3 from "web3";
+import { Metadata } from "../services/Metadata";
 import FNDNFT721 from "../abis/FNDNFT721.json";
 import {InputText} from "primereact/inputtext";
 import {Button} from "primereact/button";
@@ -9,9 +10,12 @@ export const FND = () =>{
 
     const [networkId,setNetworkId] = useState('')
     const [text, setText] = useState('');
+    const [tokenName, setTokenName] = useState('');
+    const [tokenDescription, setTokenDescription] = useState('');
+    const [tokenImg, setTokenImg] = useState('');
 
     const [balance,setBalanace] = useState(0)
-    const [amount,setAmount] = useState(0)
+    const [amount,setAmount] = useState(94137)
     const [sendTo,setSendTo] = useState('')
     const [daiTokenContract,setDaiTokenContract] = useState({})
     const [daiAddress,setDaiAddress] = useState('')
@@ -23,7 +27,7 @@ export const FND = () =>{
         setAccount(text)
     }
     const toastRef = useRef();
-
+    const metadata = new Metadata();
     useEffect(() => {
         // const productService = new ProductService();
         // productService.getProducts().then(data => setDataviewValue(data));
@@ -53,6 +57,7 @@ export const FND = () =>{
                     fndNFT721.methods.tokenURI("94137").call().then(function(val){
                         console.log(val);
                         setUrl(val);
+                        loadJson(val);
                         setDaiTokenContract(fndNFT721);
                         console.log("contract saved balance seted")
                     }).catch(function(e){
@@ -103,6 +108,7 @@ export const FND = () =>{
             fndNFT721.methods.tokenURI(token).call().then(function(val){
                 console.log(val);
                 setUrl(val);
+                loadJson(val);
                 setDaiTokenContract(fndNFT721);
                 console.log("contract saved balance seted")
             }).catch(function(e){
@@ -124,11 +130,23 @@ export const FND = () =>{
             fndNFT721.methods.tokenURI(token).call().then(function(val){
                 console.log(val);
                 setUrl(val);
+                loadJson(val);
                 console.log("contract saved balance seted",val)
             }).catch(function(e){
                 console.log("ERROR 222 ",e);
             })
         }
+    }
+    const loadJson = (url) => {
+        metadata.getMetadata(url).then(function(a){
+            console.log("JSON LOADED",a.data)
+            setTokenName(a.data.name)
+            setTokenDescription(a.data.description)
+            if(a.data.image){
+                let imagUrl = a.data.image.replace('ipfs://','https://ipfs.io/ipfs/')
+                setTokenImg(imagUrl)
+            }
+        })
     }
 
     const onFormSubmit = (e) => {
@@ -136,6 +154,13 @@ export const FND = () =>{
         console.log("sending dais",account,amount,sendTo)
         
         loadUri(account,amount);
+    }
+    const imageTag = () =>{
+        if(tokenImg.includes(".mp4")){
+            return (<div className="col-md-6 " ><b>Video:</b><video src={tokenImg} width="100%" loop autoPlay></video>   </div>);
+        }else {
+            return(<div className="col-md-6 " ><b>Image:</b><img src={tokenImg} width="100%"></img>   </div>)
+        }
     }
     return (
 
@@ -156,6 +181,18 @@ export const FND = () =>{
                         <InputText value={sendTo} onChange={(e) => setSendTo(e.target.value)} className="col-4"/>
                         <Button type="submit" label="Enviar" icon="pi pi-check" className="p-ml-2"/>
                     </form>
+                </div>
+            </div>
+            <div className=" mt-4">
+                <div className="row">
+                   <b>Name:</b>{tokenName}
+                </div>
+
+                <div className="row mt-4">
+                    <div className="col-6"><b>Description:</b><br/>{tokenDescription}</div>
+
+                    {imageTag()}
+                   
                 </div>
             </div>
 
