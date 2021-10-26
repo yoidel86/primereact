@@ -138,7 +138,8 @@ export const FND = () =>{
         }
     }
     const loadJson = (url) => {
-        metadata.getMetadata(url).then(function(a){
+        let parsed = url.replace('ipfs://','https://ipfs.io/ipfs/').replace('ipfs/ipfs','ipfs');
+        metadata.getMetadata(parsed).then(function(a){
             console.log("JSON LOADED",a.data)
             setTokenName(a.data.name)
             setTokenDescription(a.data.description)
