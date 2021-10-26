@@ -143,7 +143,8 @@ export const FND = () =>{
             setTokenName(a.data.name)
             setTokenDescription(a.data.description)
             if(a.data.image){
-                let imagUrl = a.data.image.replace('ipfs://','https://ipfs.io/ipfs/')
+                var imagUrl = a.data.image.replace('ipfs://','https://ipfs.io/ipfs/')
+                imagUrl = imagUrl.replace('ipfs/ipfs','ipfs');
                 setTokenImg(imagUrl)
             }
         })
