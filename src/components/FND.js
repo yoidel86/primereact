@@ -179,7 +179,7 @@ export const FND = () =>{
                         <label htmlFor="">Token:</label>
                         <InputText value={amount} onChange={(e) => setAmount(e.target.value)} />
                         <label htmlFor="" className="ml-4">Direccion:</label>
-                        <InputText value={sendTo} onChange={(e) => setSendTo(e.target.value)} className="col-4"/>
+                        <InputText value={account} onChange={(e) => setAccount(e.target.value)} className="col-4"/>
                         <Button type="submit" label="Enviar" icon="pi pi-check" className="p-ml-2"/>
                     </form>
                 </div>
