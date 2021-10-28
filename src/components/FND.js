@@ -5,11 +5,17 @@ import FNDNFT721 from "../abis/FNDNFT721.json";
 import {InputText} from "primereact/inputtext";
 import {Button} from "primereact/button";
 import {Toast} from "primereact/toast";
+import { Address } from 'ethereumjs-util';
 
 export const FND = () =>{
 
     const [networkId,setNetworkId] = useState('')
     const [symbol, setSymbol] = useState('');
+    const [total, setTotal] = useState('');
+    const [market, setMarket] = useState('');
+    const [name, setName] = useState('');
+    const [owner, setOwner] = useState('');
+    const [creator, setCreator] = useState('');
     const [tokenName, setTokenName] = useState('');
     const [tokenDescription, setTokenDescription] = useState('');
     const [tokenImg, setTokenImg] = useState('');
@@ -63,6 +69,7 @@ export const FND = () =>{
                     }).catch(function(e){
                         console.log("ERROR 111 ",e);
                     })
+                    loadExtras(fndNFT721,94137);
 
             });
 
@@ -88,9 +95,8 @@ export const FND = () =>{
             }).catch(function(e){
                 console.log("ERROR 222 ",e);
             })
-            fndNFT721.methods.symbol().call().then(function(symbol){
-                setSymbol(symbol)
-            })
+            loadExtras(fndNFT721,94137);
+
         }
     }
 
@@ -117,9 +123,8 @@ export const FND = () =>{
             }).catch(function(e){
                 console.log("ERROR 111 ",e);
             })
-            fndNFT721.methods.symbol().call().then(function(symbol){
-                setSymbol(symbol)
-            })
+            loadExtras(fndNFT721,token);
+
           
         } else if (window.web3) {
             window.web3 = new Web3(window.web3.currentProvider);
@@ -140,10 +145,31 @@ export const FND = () =>{
             }).catch(function(e){
                 console.log("ERROR 222 ",e);
             })
-            fndNFT721.methods.symbol().call().then(function(symbol){
-                setSymbol(symbol)
-            })
+            loadExtras(fndNFT721,token);
+            
+
         }
+    }
+    const loadExtras = (contract,token) => {
+        contract.methods.symbol().call().then(function(symbol){
+            setSymbol(symbol);
+        })
+        contract.methods.name().call().then(function(symbol){
+            setName(symbol);
+        })
+        contract.methods.ownerOf(token).call().then(function(symbol){
+            setOwner(symbol);
+        })
+        contract.methods.getNFTMarket().call().then(function(symbol){
+            setMarket(symbol);
+        })
+        contract.methods.getNFTMarket().call().then(function(symbol){
+            setMarket(symbol);
+        })
+        contract.methods.totalSupply().call().then(function(symbol){
+            setTotal(symbol);
+        })
+        
     }
     const loadJson = (url) => {
         let parsed = url.replace('ipfs://','https://ipfs.io/ipfs/').replace('ipfs/ipfs','ipfs');
@@ -172,6 +198,9 @@ export const FND = () =>{
             return(<div className="col-md-6 " ><b>Image:</b><img src={tokenImg} width="100%"></img>   </div>)
         }
     }
+    const addres = (add) =>{
+        return "https://etherscan.io/address/"+add;
+    }
     return (
 
         <div className="p-grid list-demo card border-2 border-blue-50 p-3">
@@ -179,9 +208,20 @@ export const FND = () =>{
             <div className="row">
                 <div className="col-md-6"><div className='card'>
                      SYMBOL:{symbol}<br/>
-                     ADDRESS:{account} <br/>
+                     NAME:{name}<br/>
+                     ADDRESS:<a href={addres(account)}>{account}</a> <br/>
+                     Market:<a href={addres(market)}>{market}</a> <br/>
+                     Cantidad creados:{total} <br/>
+
+
+
+
                      TOKEN:{amount}<br/>
+                     Owner:<a href={addres(owner)}>{owner}</a><br/>
+                     Creator:<a href={addres(creator)}>{creator}</a><br/>
+
                      METADATA url:<a href={url} target="_blank"> {url}</a>
+                     
                 </div></div>
                 <div className="col-md-6">
                     <form className="p-d-flex p-jc-center p-mt-6" onSubmit={onFormSubmit}>
